@@ -46,4 +46,16 @@ def create_bill(bill: CreateBillRequest):
             cursor.execute(
                 "INSERT INTO bill_participants (bill_id, email, amount_due, is_paid) VALUES (%s, %s, %s, FALSE)",
                 (bill_id, participant.email, participant.amount_due)
-    
+            )
+
+        conn.commit()  # Lưu thay đổi vào database
+
+        return {"message": "Tạo bill thành công", "bill_id": bill_id}
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        cursor.close()
+        conn.close()
