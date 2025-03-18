@@ -7,14 +7,20 @@
 </head>
 <body>
     <h1>Test API Fetch</h1>
+    <input type="email" id="email" placeholder="Nhập email của bạn">
     <button onclick="fetchBills()">Lấy danh sách bills</button>
     <pre id="output"></pre>
 
     <script>
-        const API_BASE_URL = "http://your-vps-ip:8000";
+        const API_BASE_URL = "http://88.222.213.9:8000";
         
         function fetchBills() {
-            fetch(`${API_BASE_URL}/get-user-bills/test@example.com`)
+            const email = document.getElementById("email").value;
+            if (!email) {
+                alert("Vui lòng nhập email");
+                return;
+            }
+            fetch(`${API_BASE_URL}/get-user-bills/${email}`)
                 .then(response => response.json())
                 .then(data => {
                     console.log("Dữ liệu API:", data);
