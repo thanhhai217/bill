@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API</title>
+</head>
+<body>
+    <h1>Test API Fetch</h1>
+    <button onclick="fetchBills()">Lấy danh sách bills</button>
+    <pre id="output"></pre>
+
+    <script>
+        const API_BASE_URL = "http://your-vps-ip:8000";
+        
+        function fetchBills() {
+            fetch(`${API_BASE_URL}/get-user-bills/test@example.com`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Dữ liệu API:", data);
+                    document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error("Lỗi:", error));
+        }
+    </script>
+</body>
+</html>
