@@ -162,3 +162,44 @@ def update_payment(payment: UpdatePaymentRequest):
     finally:
         cursor.close()
         conn.close()
+
+
+@app.get("/get-user-bills/{email}")
+def get_user_bills(email: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT b.id, b.purpose, b.date, b.total_amount, b.creator_email, b.status, 
+                   b.qr_url, b.account_number, b.bank_name
+            FROM bills b
+            WHERE b.creator_email = %s OR EXISTS (
+                SELECT 1 FROM bill_participants bp WHERE bp.bill_id = b.id AND bp.email = %s
+            )
+            ORDER BY b.status, b.date DESC
+        """, (email, email))
+
+        bills = []
+        for row in cursor.fetchall():
+            bills.append({
+                "bill_id": row[0],
+                "purpose": row[1],
+                "date": row[2],
+                "total_amount": row[3],
+                "creator_email": row[4],
+                "status": row[5],
+                "qr_url": row[6],
+                "account_number": row[7],
+                "bank_name": row[8],
+            })
+
+        return {"bills": bills}
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        cursor.close()
+        conn.close()
