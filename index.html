@@ -60,10 +60,34 @@
 
         function checkBills() {
             const email = document.getElementById("checkEmail").value;
+
+            // Kiểm tra nếu email trống
+            if (!email) {
+                alert("Vui lòng nhập email để kiểm tra bill.");
+                return;
+            }
+
+            // Gửi yêu cầu đến API
             fetch(`${API_BASE_URL}/get-bills/${email}`)
-            .then(response => response.json())
-            .then(data => document.getElementById("bills").innerText = JSON.stringify(data, null, 2))
-            .catch(error => document.getElementById("bills").innerText = "Lỗi: " + error);
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Lỗi API: ${response.status} - ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hiển thị danh sách bill trong div "bills"
+                    const billsDiv = document.getElementById("bills");
+                    if (data.length === 0) {
+                        billsDiv.innerText = "Không tìm thấy bill nào cho email này.";
+                    } else {
+                        billsDiv.innerText = JSON.stringify(data, null, 2);
+                    }
+                })
+                .catch(error => {
+                    // Hiển thị lỗi trong div "bills"
+                    document.getElementById("bills").innerText = `Lỗi: ${error.message}`;
+                });
         }
     </script>
 </body>
