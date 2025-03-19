@@ -3,31 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test API</title>
+    <title>Test API Tạo Bill</title>
 </head>
 <body>
-    <h1>Test API Fetch</h1>
-    <input type="email" id="email" placeholder="Nhập email của bạn">
-    <button onclick="fetchBills()">Lấy danh sách bills</button>
-    <pre id="output"></pre>
+    <h2>Test API Tạo Bill</h2>
+    <form id="billForm">
+        <label for="purpose">Mục đích:</label>
+        <input type="text" id="purpose" name="purpose" required><br><br>
+
+        <label for="date">Ngày:</label>
+        <input type="date" id="date" name="date" required><br><br>
+
+        <label for="total_amount">Tổng tiền:</label>
+        <input type="number" id="total_amount" name="total_amount" required><br><br>
+
+        <label for="creator_email">Email người tạo:</label>
+        <input type="email" id="creator_email" name="creator_email" required><br><br>
+
+        <label for="participants">Người tham gia (Email - Số tiền, cách nhau bởi dấu phẩy):</label>
+        <input type="text" id="participants" name="participants" required placeholder="test@example.com-100000, another@example.com-200000"><br><br>
+
+        <label for="qr_url">QR Code URL (Tùy chọn):</label>
+        <input type="text" id="qr_url" name="qr_url"><br><br>
+
+        <label for="account_number">Số tài khoản (Tùy chọn):</label>
+        <input type="text" id="account_number" name="account_number"><br><br>
+
+        <label for="bank_name">Ngân hàng (Tùy chọn):</label>
+        <input type="text" id="bank_name" name="bank_name"><br><br>
+
+        <button type="submit">Tạo Bill</button>
+    </form>
+
+    <h3>Kết quả:</h3>
+    <pre id="result"></pre>
 
     <script>
-        const API_BASE_URL = "https://88.222.213.9:8000";
-        
-        function fetchBills() {
-            const email = document.getElementById("email").value;
-            if (!email) {
-                alert("Vui lòng nhập email");
-                return;
+        document.getElementById("billForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const API_BASE_URL = "https://n8n.thanhhai217.com/webhook-test/create-bill"; // Đổi API nếu cần
+
+            const purpose = document.getElementById("purpose").value;
+            const date = document.getElementById("date").value;
+            const total_amount = parseFloat(document.getElementById("total_amount").value);
+            const creator_email = document.getElementById("creator_email").value;
+            const qr_url = document.getElementById("qr_url").value;
+            const account_number = document.getElementById("account_number").value;
+            const bank_name = document.getElementById("bank_name").value;
+
+            const participantsInput = document.getElementById("participants").value;
+            const participants = participantsInput.split(",").map(p => {
+                const [email, amount] = p.split("-");
+                return { email: email.trim(), amount_due: parseFloat(amount.trim()) };
+            });
+
+            const billData = {
+                purpose,
+                date,
+                total_amount,
+                creator_email,
+                participants,
+                qr_url,
+                account_number,
+                bank_name
+            };
+
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(billData)
+                });
+
+                const result = await response.json();
+                document.getElementById("result").textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById("result").textContent = "Lỗi: " + error;
             }
-            fetch(`${API_BASE_URL}/get-user-bills/${email}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Dữ liệu API:", data);
-                    document.getElementById("output").innerText = JSON.stringify(data, null, 2);
-                })
-                .catch(error => console.error("Lỗi:", error));
-        }
+        });
     </script>
 </body>
 </html>

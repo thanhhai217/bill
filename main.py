@@ -3,6 +3,9 @@ from pydantic import BaseModel, EmailStr
 from typing import List
 import psycopg2
 from database import get_connection
+import requests  # Add this import for sending webhook notifications
+import logging  # Add this import for logging
+import json  # Add this import for JSON handling
 
 app = FastAPI()
 
@@ -42,6 +45,11 @@ def create_bill(bill: CreateBillRequest):
         if cursor.fetchone() is None:
             raise HTTPException(status_code=400, detail="Người tạo bill không tồn tại")
 
+        # Kiểm tra tổng số tiền của participants có khớp với total_amount không
+        total_participant_amount = sum(participant.amount_due for participant in bill.participants)
+        if total_participant_amount != bill.total_amount:
+            raise HTTPException(status_code=400, detail="Tổng số tiền của người tham gia không khớp với tổng số tiền hóa đơn")
+
         # Chèn hóa đơn vào bảng bills
         cursor.execute(
             """INSERT INTO bills (purpose, date, total_amount, creator_email, status, qr_url, account_number, bank_name)
@@ -59,11 +67,33 @@ def create_bill(bill: CreateBillRequest):
 
         conn.commit()  # Lưu thay đổi vào database
 
+        # Gửi webhook thông báo
+        try:
+            webhook_url = "https://n8n.thanhhai217.com/webhook/create-bill"
+            webhook_payload = {
+                "bill_id": bill_id,
+                "purpose": bill.purpose,
+                "date": bill.date,
+                "total_amount": bill.total_amount,
+                "creator_email": bill.creator_email,
+                "participants": [{"email": p.email, "amount_due": p.amount_due} for p in bill.participants],
+                "qr_url": bill.qr_url,
+                "account_number": bill.account_number,
+                "bank_name": bill.bank_name
+            }
+            requests.post(webhook_url, json=webhook_payload)
+        except Exception as webhook_error:
+            # Log webhook error but do not fail the request
+            print(f"Webhook error: {webhook_error}")
+
         return {"message": "Tạo bill thành công", "bill_id": bill_id}
 
+    except HTTPException as http_exc:
+        conn.rollback()
+        raise http_exc
     except Exception as e:
         conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Lỗi hệ thống: " + str(e))
 
     finally:
         cursor.close()
@@ -155,9 +185,12 @@ def update_payment(payment: UpdatePaymentRequest):
         conn.commit()
         return {"message": "Cập nhật thanh toán thành công"}
 
+    except HTTPException as http_exc:
+        conn.rollback()
+        raise http_exc
     except Exception as e:
         conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Lỗi hệ thống: " + str(e))
 
     finally:
         cursor.close()
