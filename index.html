@@ -3,85 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test API Tạo Bill</title>
+    <title>Test API Tạo & Kiểm Tra Bill</title>
 </head>
 <body>
     <h2>Test API Tạo Bill</h2>
-    <form id="billForm">
-        <label for="purpose">Mục đích:</label>
-        <input type="text" id="purpose" name="purpose" required><br><br>
-
-        <label for="date">Ngày:</label>
-        <input type="date" id="date" name="date" required><br><br>
-
-        <label for="total_amount">Tổng tiền:</label>
-        <input type="number" id="total_amount" name="total_amount" required><br><br>
-
-        <label for="creator_email">Email người tạo:</label>
-        <input type="email" id="creator_email" name="creator_email" required><br><br>
-
-        <label for="participants">Người tham gia (Email - Số tiền, cách nhau bởi dấu phẩy):</label>
-        <input type="text" id="participants" name="participants" required placeholder="test@example.com-100000, another@example.com-200000"><br><br>
-
-        <label for="qr_url">QR Code URL (Tùy chọn):</label>
-        <input type="text" id="qr_url" name="qr_url"><br><br>
-
-        <label for="account_number">Số tài khoản (Tùy chọn):</label>
-        <input type="text" id="account_number" name="account_number"><br><br>
-
-        <label for="bank_name">Ngân hàng (Tùy chọn):</label>
-        <input type="text" id="bank_name" name="bank_name"><br><br>
-
-        <button type="submit">Tạo Bill</button>
-    </form>
-
+    <label for="purpose">Mục đích:</label>
+    <input type="text" id="purpose" placeholder="Nhập mục đích bill">
+    <br>
+    <label for="date">Ngày:</label>
+    <input type="date" id="date">
+    <br>
+    <label for="total">Tổng tiền:</label>
+    <input type="number" id="total" placeholder="Nhập tổng số tiền">
+    <br>
+    <label for="creator">Email người tạo:</label>
+    <input type="email" id="creator" placeholder="Nhập email">
+    <br>
+    <label for="participants">Người tham gia (Email - Số tiền, cách nhau bởi dấu phẩy):</label>
+    <input type="text" id="participants" placeholder="test@example.com - 100000">
+    <br>
+    <button onclick="createBill()">Tạo Bill</button>
     <h3>Kết quả:</h3>
-    <pre id="result"></pre>
+    <div id="result"></div>
+
+    <h2>Kiểm Tra Bill</h2>
+    <label for="checkEmail">Email:</label>
+    <input type="email" id="checkEmail" placeholder="Nhập email để kiểm tra bill">
+    <button onclick="checkBills()">Kiểm tra Bill</button>
+    <h3>Danh sách Bill:</h3>
+    <div id="bills"></div>
 
     <script>
-        document.getElementById("billForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-
-            const API_BASE_URL = "https://n8n.thanhhai217.com/webhook-test/create-bill"; // Đổi API nếu cần
-
+        const API_BASE_URL = "https://n8n.thanhhai217.com/webhook-test"; // Thay bằng API webhook của bạn
+        
+        function createBill() {
             const purpose = document.getElementById("purpose").value;
             const date = document.getElementById("date").value;
-            const total_amount = parseFloat(document.getElementById("total_amount").value);
-            const creator_email = document.getElementById("creator_email").value;
-            const qr_url = document.getElementById("qr_url").value;
-            const account_number = document.getElementById("account_number").value;
-            const bank_name = document.getElementById("bank_name").value;
-
+            const total_amount = document.getElementById("total").value;
+            const creator_email = document.getElementById("creator").value;
             const participantsInput = document.getElementById("participants").value;
+            
             const participants = participantsInput.split(",").map(p => {
-                const [email, amount] = p.split("-");
-                return { email: email.trim(), amount_due: parseFloat(amount.trim()) };
+                const [email, amount] = p.trim().split(" - ");
+                return { email, amount_due: parseFloat(amount) };
             });
 
-            const billData = {
-                purpose,
-                date,
-                total_amount,
-                creator_email,
-                participants,
-                qr_url,
-                account_number,
-                bank_name
-            };
+            fetch(`${API_BASE_URL}/create-bill`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ purpose, date, total_amount, creator_email, participants })
+            })
+            .then(response => response.json())
+            .then(data => document.getElementById("result").innerText = JSON.stringify(data, null, 2))
+            .catch(error => document.getElementById("result").innerText = "Lỗi: " + error);
+        }
 
-            try {
-                const response = await fetch(API_BASE_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(billData)
-                });
-
-                const result = await response.json();
-                document.getElementById("result").textContent = JSON.stringify(result, null, 2);
-            } catch (error) {
-                document.getElementById("result").textContent = "Lỗi: " + error;
-            }
-        });
+        function checkBills() {
+            const email = document.getElementById("checkEmail").value;
+            fetch(`${API_BASE_URL}/get-bills/${email}`)
+            .then(response => response.json())
+            .then(data => document.getElementById("bills").innerText = JSON.stringify(data, null, 2))
+            .catch(error => document.getElementById("bills").innerText = "Lỗi: " + error);
+        }
     </script>
 </body>
 </html>
