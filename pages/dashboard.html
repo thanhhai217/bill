@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Danh sách Bill</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Danh sách hóa đơn</h2>
+        <p>Chào, <span id="user-email"></span>!</p>
+        
+        <button id="create-bill-btn">+ Tạo Bill Mới</button>
+        <button id="logout-btn" class="logout">Đăng Xuất</button>
+
+        <div id="bills-container">
+            <p>Đang tải danh sách hóa đơn...</p>
+        </div>
+    </div>
+
+    <script src="assets/api.js"></script>
+    <script src="assets/bills.js"></script>
+</body>
+</html>
