@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Bill</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Test API Tạo Bill</h2>
+        <label>Mục đích:</label>
+        <input type="text" id="purpose" placeholder="Mục đích bill">
+
+        <label>Ngày:</label>
+        <input type="date" id="date">
+
+        <label>Tổng tiền:</label>
+        <input type="number" id="total_amount" placeholder="Tổng số tiền">
+
+        <label>Email người tạo:</label>
+        <input type="email" id="creator_email" placeholder="Email người tạo">
+
+        <label>Người tham gia (Email - Số tiền, cách nhau bằng dấu phẩy):</label>
+        <input type="text" id="participants" placeholder="example@example.com - 100000">
+
+        <label>QR Code URL (Tùy chọn):</label>
+        <input type="text" id="qr_url" placeholder="URL QR Code">
+
+        <label>Số tài khoản (Tùy chọn):</label>
+        <input type="text" id="account_number" placeholder="Số tài khoản">
+
+        <label>Ngân hàng (Tùy chọn):</label>
+        <input type="text" id="bank_name" placeholder="Tên ngân hàng">
+
+        <button onclick="createBill()">Tạo Bill</button>
+
+        <h3>Kết quả:</h3>
+        <pre id="result"></pre>
+    </div>
+
+    <script>
+        const API_URL = "https://n8n.thanhhai217.com/webhook-test/create-bill";
+
+        function createBill() {
+            const purpose = document.getElementById("purpose").value;
+            const date = document.getElementById("date").value;
+            const total_amount = document.getElementById("total_amount").value;
+            const creator_email = document.getElementById("creator_email").value;
+            const qr_url = document.getElementById("qr_url").value;
+            const account_number = document.getElementById("account_number").value;
+            const bank_name = document.getElementById("bank_name").value;
+            
+            const participantsInput = document.getElementById("participants").value;
+            const participants = participantsInput.split(",").map(p => {
+                const [email, amount] = p.trim().split(" - ");
+                return { email, amount_due: parseFloat(amount) };
+            });
+
+            const billData = {
+                purpose,
+                date,
+                total_amount: parseFloat(total_amount),
+                creator_email,
+                participants,
+                qr_url: qr_url || null,
+                account_number: account_number || null,
+                bank_name: bank_name || null
+            };
+
+            fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(billData)
+            })
+            .then(res => res.json())
+            .then(data => document.getElementById("result").innerText = JSON.stringify(data, null, 2))
+            .catch(err => document.getElementById("result").innerText = "Lỗi: " + err);
+        }
+    </script>
+</body>
+</html>
