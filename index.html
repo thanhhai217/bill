@@ -1,93 +1,90 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test API Tạo & Kiểm Tra Bill</title>
+    <title>Login with PIN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h2>Test API Tạo Bill</h2>
-    <label for="purpose">Mục đích:</label>
-    <input type="text" id="purpose" placeholder="Nhập mục đích bill">
-    <br>
-    <label for="date">Ngày:</label>
-    <input type="date" id="date">
-    <br>
-    <label for="total">Tổng tiền:</label>
-    <input type="number" id="total" placeholder="Nhập tổng số tiền">
-    <br>
-    <label for="creator">Email người tạo:</label>
-    <input type="email" id="creator" placeholder="Nhập email">
-    <br>
-    <label for="participants">Người tham gia (Email - Số tiền, cách nhau bởi dấu phẩy):</label>
-    <input type="text" id="participants" placeholder="test@example.com - 100000">
-    <br>
-    <button onclick="createBill()">Tạo Bill</button>
-    <h3>Kết quả:</h3>
-    <div id="result"></div>
-
-    <h2>Kiểm Tra Bill</h2>
-    <label for="checkEmail">Email:</label>
-    <input type="email" id="checkEmail" placeholder="Nhập email để kiểm tra bill">
-    <button onclick="checkBills()">Kiểm tra Bill</button>
-    <h3>Danh sách Bill:</h3>
-    <div id="bills"></div>
+    <div class="container">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Enter your email">
+        <button onclick="sendPin()">Send PIN</button>
+        
+        <input type="text" id="pin" placeholder="Enter PIN" maxlength="4">
+        <button onclick="verifyPin()">Login</button>
+        
+        <p id="message"></p>
+    </div>
 
     <script>
-        const API_BASE_URL = "https://n8n.thanhhai217.com/webhook/create-bill"; // Thay bằng API webhook của bạn
-        
-        function createBill() {
-            const purpose = document.getElementById("purpose").value;
-            const date = document.getElementById("date").value;
-            const total_amount = document.getElementById("total").value;
-            const creator_email = document.getElementById("creator").value;
-            const participantsInput = document.getElementById("participants").value;
-            
-            const participants = participantsInput.split(",").map(p => {
-                const [email, amount] = p.trim().split(" - ");
-                return { email, amount_due: parseFloat(amount) };
-            });
+        const API_URL = "https://n8n.thanhhai217.com/webhook";
 
-            fetch(`${API_BASE_URL}/create-bill`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ purpose, date, total_amount, creator_email, participants })
-            })
-            .then(response => response.json())
-            .then(data => document.getElementById("result").innerText = JSON.stringify(data, null, 2))
-            .catch(error => document.getElementById("result").innerText = "Lỗi: " + error);
-        }
-
-        function checkBills() {
-            const email = document.getElementById("checkEmail").value;
-
-            // Kiểm tra nếu email trống
+        function sendPin() {
+            const email = document.getElementById("email").value;
             if (!email) {
-                alert("Vui lòng nhập email để kiểm tra bill.");
+                alert("Please enter your email");
                 return;
             }
 
-            // Gửi yêu cầu đến API
-            fetch(`${API_BASE_URL}/get-bills/${email}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Lỗi API: ${response.status} - ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Hiển thị danh sách bill trong div "bills"
-                    const billsDiv = document.getElementById("bills");
-                    if (data.length === 0) {
-                        billsDiv.innerText = "Không tìm thấy bill nào cho email này.";
-                    } else {
-                        billsDiv.innerText = JSON.stringify(data, null, 2);
-                    }
-                })
-                .catch(error => {
-                    // Hiển thị lỗi trong div "bills"
-                    document.getElementById("bills").innerText = `Lỗi: ${error.message}`;
-                });
+            fetch(`${API_URL}/request-pin`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            })
+            .then(res => res.json())
+            .then(data => document.getElementById("message").innerText = "PIN sent to email")
+            .catch(err => console.error(err));
+        }
+
+        function verifyPin() {
+            const email = document.getElementById("email").value;
+            const pin = document.getElementById("pin").value;
+
+            fetch(`${API_URL}/verify-pin`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, pin })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    localStorage.setItem("email", email);
+                    document.getElementById("message").innerText = "Login successful!";
+                } else {
+                    document.getElementById("message").innerText = "Invalid PIN";
+                }
+            })
+            .catch(err => console.error(err));
         }
     </script>
 </body>

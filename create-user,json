@@ -1,0 +1,126 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "path": "create-user",
+        "methods": ["POST"],
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "query": "SELECT * FROM users WHERE email = $1;",
+        "values": "json",
+        "parameters": [
+          {
+            "name": "1",
+            "value": "={{$json[\"email\"]}}"
+          }
+        ]
+      },
+      "name": "Check Email in DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"length\"]}}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Check If Email Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ pincode: Math.floor(1000 + Math.random() * 9000).toString() }];"
+      },
+      "name": "Generate Pincode",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [800, 400]
+    },
+    {
+      "parameters": {
+        "query": "INSERT INTO users (email, pincode) VALUES ($1, $2);",
+        "values": "json",
+        "parameters": [
+          {
+            "name": "1",
+            "value": "={{$json[\"email\"]}}"
+          },
+          {
+            "name": "2",
+            "value": "={{$json[\"pincode\"]}}"
+          }
+        ]
+      },
+      "name": "Insert into DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1000, 400]
+    },
+    {
+      "parameters": {
+        "options": {},
+        "responseBody": "{ \"message\": \"User created\", \"pincode\": \"={{$json[\"pincode\"]}}\" }"
+      },
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.webhookResponse",
+      "typeVersion": 1,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "options": {},
+        "responseBody": "{ \"message\": \"Email đã tồn tại\" }"
+      },
+      "name": "Respond Email Exists",
+      "type": "n8n-nodes-base.webhookResponse",
+      "typeVersion": 1,
+      "position": [800, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Check Email in DB", "type": "main", "index": 0 }]
+      ]
+    },
+    "Check Email in DB": {
+      "main": [
+        [{ "node": "Check If Email Exists", "type": "main", "index": 0 }]
+      ]
+    },
+    "Check If Email Exists": {
+      "main": [
+        [{ "node": "Respond Email Exists", "type": "main", "index": 0 }],
+        [{ "node": "Generate Pincode", "type": "main", "index": 0 }]
+      ]
+    },
+    "Generate Pincode": {
+      "main": [
+        [{ "node": "Insert into DB", "type": "main", "index": 0 }]
+      ]
+    },
+    "Insert into DB": {
+      "main": [
+        [{ "node": "Respond Success", "type": "main", "index": 0 }]
+      ]
+    }
+  }
+}
