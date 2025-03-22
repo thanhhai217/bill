@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chia tiền - Tạo hóa đơn</title>
   <link rel="stylesheet" href="../assets/styles.css" />
+  <!-- Thêm flatpickr cho date picker -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
   <div class="container">
@@ -23,35 +25,36 @@
 
     <div class="form-group">
       <label for="purpose">Loại ghi chú</label>
-      <input type="text" id="purpose" placeholder="Thêm chi tiêu" />
+      <select id="purpose">
+        <option value="Thêm chi tiêu">Thêm chi tiêu</option>
+        <option value="Ăn uống">Ăn uống</option>
+        <option value="Du lịch">Du lịch</option>
+        <option value="Mua sắm">Mua sắm</option>
+      </select>
     </div>
 
     <div class="form-group">
       <label for="date">Thời gian</label>
-      <input type="date" id="date" />
+      <input type="text" id="date" placeholder="Hôm nay" />
     </div>
 
     <div class="form-group">
       <label for="paid-by">Trả bởi</label>
-      <select id="paid-by">
-        <!-- Sẽ được đổ dữ liệu từ JS -->
-      </select>
+      <select id="paid-by"></select>
     </div>
 
     <div class="form-group">
-      <label for="members">Chia hoá đơn</label>
-      <select id="members" multiple>
-        <!-- Danh sách thành viên, hiển thị bằng JS dưới dạng modal hoặc select box -->
-      </select>
+      <label>Chia hóa đơn</label>
+      <button id="open-members-modal" class="btn">Chia đều cá nhân</button>
     </div>
 
     <div class="form-group">
-      <label for="receipt">Ảnh hóa đơn (tuỳ chọn)</label>
+      <label for="receipt">Ảnh hóa đơn (tùy chọn)</label>
       <input type="file" id="receipt" accept="image/*" />
     </div>
 
     <div class="form-group">
-      <label for="qr">Ảnh QR thanh toán (tuỳ chọn)</label>
+      <label for="qr">Ảnh QR thanh toán (tùy chọn)</label>
       <input type="file" id="qr" accept="image/*" />
     </div>
 
@@ -59,6 +62,18 @@
     <p id="message" class="message"></p>
   </div>
 
+  <!-- Modal cho danh sách thành viên -->
+  <div id="members-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Chia hóa đơn</h3>
+      <div id="members-list"></div>
+      <button id="save-members" class="btn primary">Lưu</button>
+      <button id="close-members-modal" class="btn">Hủy</button>
+    </div>
+  </div>
+
   <script src="../assets/create-bill.js"></script>
+  <!-- Thêm flatpickr -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
 </html>

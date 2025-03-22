@@ -59,36 +59,71 @@ async function checkSession() {
 
 // Hàm tải danh sách hóa đơn
 async function fetchBills() {
-  // Giả lập dữ liệu hóa đơn, bạn có thể thay bằng API thực tế
-  const bills = [
-    { id: 1, description: 'Hóa đơn 1', amount: 100, date: '2025-03-22' },
-    { id: 2, description: 'Hóa đơn 2', amount: 200, date: '2025-03-23' },
-  ];
+  const sessionToken = localStorage.getItem('session_token');
+  const userEmail = localStorage.getItem('user_email');
 
-  const billList = document.getElementById('bill-list');
-  if (!billList) {
-    console.error('Element with ID "bill-list" not found.');
-    return;
+  try {
+    // Gọi webhook check-bill để lấy danh sách hóa đơn
+    const response = await fetch('https://n8n.thanhhai217.com/webhook/check-bill', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session_token: sessionToken,
+        email: userEmail,
+      }),
+    });
+
+    const bills = await response.json();
+
+    const billList = document.getElementById('bill-list');
+    if (!billList) {
+      console.error('Element with ID "bill-list" not found.');
+      return;
+    }
+
+    billList.innerHTML = ''; // Xóa nội dung cũ
+
+    // Kiểm tra nếu không có hóa đơn
+    if (!bills || bills.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td colspan="4" style="text-align: center;">Chưa có hóa đơn nào được chia</td>
+      `;
+      billList.appendChild(row);
+      return;
+    }
+
+    // Nếu có hóa đơn, hiển thị danh sách
+    bills.forEach(bill => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${bill.id}</td>
+        <td>${bill.description}</td>
+        <td>${bill.amount}</td>
+        <td>${bill.date}</td>
+      `;
+      billList.appendChild(row);
+    });
+  } catch (error) {
+    console.error('Error fetching bills:', error);
+    const billList = document.getElementById('bill-list');
+    if (billList) {
+      billList.innerHTML = '';
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td colspan="4" style="text-align: center;">Chưa có hóa đơn nào được chia</td>
+      `;
+      billList.appendChild(row);
+    }
   }
-
-  billList.innerHTML = ''; // Xóa nội dung cũ
-
-  bills.forEach(bill => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${bill.id}</td>
-      <td>${bill.description}</td>
-      <td>${bill.amount}</td>
-      <td>${bill.date}</td>
-    `;
-    billList.appendChild(row);
-  });
 }
 
 // Hàm xử lý khi nhấn nút "Tạo Bill Mới"
 function createNewBill() {
-  // Hiện tại chỉ hiển thị thông báo, bạn có thể thay bằng logic thực tế (ví dụ: mở form hoặc gọi API)
-  alert('Chức năng tạo bill mới đang được phát triển!');
+  // Chuyển hướng đến trang create-bill.html (cùng thư mục với dashboard.html)
+  window.location.href = 'create-bill.html';
 }
 
 // Hàm đăng xuất
