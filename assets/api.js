@@ -33,8 +33,8 @@ async function verifyPin(email, pin) {
  * @returns {Promise<Object>} - Danh sách bill
  */
 async function getUserBills(email) {
-    return await fetch(`${API_BASE_URL}/get-bills/${email}`)
-        .then(res => res.json());
+  return await fetch(`https://n8n.thanhhai217.com/webhook/get-bills/${email}`)
+    .then(res => res.json());
 }
 
 /**

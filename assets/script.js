@@ -1,6 +1,5 @@
-// Kiểm tra khi DOM đã tải xong
+// assets/script.js
 document.addEventListener("DOMContentLoaded", () => {
-  // Gán biến
   const loginForm = document.getElementById("login-form");
   const signupForm = document.getElementById("signup-form");
   const switchToSignup = document.getElementById("switch-to-signup");
@@ -43,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const data = await res.json();
+      console.log("Create-user response:", data);
 
       if (data.status === "error" && data.message === "Email has been used") {
         showMessage("Email đã được sử dụng. Vui lòng đăng nhập!", "error");
@@ -56,40 +56,52 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("email").value = email;
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error during signup:", err);
       showMessage("Có lỗi xảy ra khi gửi email", "error");
     }
   });
 
   // Xử lý đăng nhập
-// assets/script.js
-btnLogin?.addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const pin = document.getElementById("pin").value.trim();
-  if (!email || !pin) return showMessage("Vui lòng nhập đầy đủ thông tin", "error");
+  btnLogin?.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const pin = document.getElementById("pin").value.trim();
+    if (!email || !pin) return showMessage("Vui lòng nhập đầy đủ thông tin", "error");
 
-  try {
-    const res = await fetch("https://n8n.thanhhai217.com/webhook/verify-pin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, pin })
-    });
+    try {
+      const res = await fetch("https://n8n.thanhhai217.com/webhook/verify-pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, pin })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
+      console.log("Verify-pin response:", data);
 
-    if (data.status === "success") {
-      // Lưu thông tin phiên vào localStorage
-      localStorage.setItem("user_email", email);
-      localStorage.setItem("session_token", data.session_token || "temp-token"); // Server cần trả về token
-      localStorage.setItem("login_timestamp", Date.now()); // Thời gian đăng nhập (milliseconds)
-      window.location.href = "pages/dashboard.html";
-    } else {
-      showMessage("Mã PIN không đúng hoặc hết hạn!", "error");
+      if (data.status === "success") {
+        if (!data.session_token) {
+          console.error("Session token missing in verify-pin response");
+          showMessage("Lỗi: Không nhận được session token từ server", "error");
+          return;
+        }
+
+        // Lưu thông tin phiên vào localStorage
+        localStorage.setItem("user_email", email);
+        localStorage.setItem("session_token", data.session_token);
+        localStorage.setItem("login_timestamp", Date.now().toString());
+        console.log("Saved to localStorage:", {
+          user_email: localStorage.getItem("user_email"),
+          session_token: localStorage.getItem("session_token"),
+          login_timestamp: localStorage.getItem("login_timestamp")
+        });
+
+        // Chuyển hướng tới dashboard
+        window.location.href = "pages/dashboard.html";
+      } else {
+        showMessage("Mã PIN không đúng hoặc hết hạn!", "error");
+      }
+    } catch (err) {
+      console.error("Error during login:", err);
+      showMessage("Có lỗi xảy ra khi đăng nhập", "error");
     }
-  } catch (err) {
-    console.error(err);
-    showMessage("Có lỗi xảy ra khi đăng nhập", "error");
-  }
-});
-
+  });
 });
