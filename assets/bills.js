@@ -57,7 +57,7 @@ async function checkSession() {
   }
 }
 
-// Hàm tải danh sách hóa đơn (giả lập - bạn có thể thay thế bằng API thật)
+// Hàm tải danh sách hóa đơn
 async function fetchBills() {
   // Giả lập dữ liệu hóa đơn, bạn có thể thay bằng API thực tế
   const bills = [
@@ -85,6 +85,12 @@ async function fetchBills() {
   });
 }
 
+// Hàm xử lý khi nhấn nút "Tạo Bill Mới"
+function createNewBill() {
+  // Hiện tại chỉ hiển thị thông báo, bạn có thể thay bằng logic thực tế (ví dụ: mở form hoặc gọi API)
+  alert('Chức năng tạo bill mới đang được phát triển!');
+}
+
 // Hàm đăng xuất
 function logout() {
   localStorage.clear(); // Xóa localStorage khi đăng xuất
@@ -101,9 +107,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchBills();
   }
 
-  // Gắn sự kiện cho nút đăng xuất (nếu có)
+  // Gắn sự kiện cho nút đăng xuất
   const logoutButton = document.getElementById('logout-button');
   if (logoutButton) {
     logoutButton.addEventListener('click', logout);
+  }
+
+  // Gắn sự kiện cho nút "Tạo Bill Mới"
+  const addBillButton = document.querySelector('.btn-add');
+  if (addBillButton) {
+    addBillButton.addEventListener('click', createNewBill);
   }
 });

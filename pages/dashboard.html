@@ -1,25 +1,65 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Danh sách Bill</title>
-  <link rel="stylesheet" href="../assets/styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .btn-add {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+    .btn-logout {
+      background-color: #f44336;
+      color: white;
+      border: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Danh sách hóa đơn</h2>
-    <p>Chào, <span id="user-email"></span>!</p>
+  <h2>Danh sách hóa đơn</h2>
+  <p>Chào, !</p>
 
-    <button id="create-bill-btn">+ Tạo Bill Mới</button>
-    <button id="logout-btn" class="logout">Đăng Xuất</button>
+  <button class="btn-add">+ Tạo Bill Mới</button>
+  <button class="btn-logout" id="logout-button">Đăng Xuất</button>
 
-    <div id="bills-container">
-      <p>Đang tải danh sách hóa đơn...</p>
-    </div>
-  </div>
+  <h3>Đang tải danh sách hóa đơn...</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Mô tả</th>
+        <th>Số tiền</th>
+        <th>Ngày</th>
+      </tr>
+    </thead>
+    <tbody id="bill-list"></tbody> <!-- Phần tử với id="bill-list" -->
+  </table>
 
-  <script src="../assets/api.js"></script>
   <script src="../assets/bills.js"></script>
 </body>
 </html>
