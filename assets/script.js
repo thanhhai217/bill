@@ -1,75 +1,91 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const loginForm = document.getElementById("login-form");
-    const pinForm = document.getElementById("pin-form");
-    const emailInput = document.getElementById("email");
-    const pinInput = document.getElementById("pin");
-    const message = document.getElementById("message");
+// Kiểm tra khi DOM đã tải xong
+document.addEventListener("DOMContentLoaded", () => {
+  // Gán biến
+  const loginForm = document.getElementById("login-form");
+  const signupForm = document.getElementById("signup-form");
+  const switchToSignup = document.getElementById("switch-to-signup");
+  const switchToLogin = document.getElementById("switch-to-login");
+  const btnSend = document.getElementById("btn-send");
+  const btnLogin = document.getElementById("btn-login");
+  const messageBox = document.getElementById("message");
 
-    const API_BASE_URL = "https://n8n.thanhhai217.com/webhook";
+  // Helper hiển thị thông báo
+  function showMessage(msg, type = "info") {
+    messageBox.textContent = msg;
+    messageBox.style.color = type === "error" ? "red" : "green";
+  }
 
-    // 🟢 Xử lý khi user nhập email
-    loginForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
-        const email = emailInput.value.trim();
+  // Chuyển form
+  switchToSignup?.addEventListener("click", (e) => {
+    e.preventDefault();
+    loginForm.classList.add("hidden");
+    signupForm.classList.remove("hidden");
+    messageBox.textContent = "";
+  });
 
-        if (!email) {
-            message.textContent = "Vui lòng nhập email hợp lệ!";
-            return;
-        }
+  switchToLogin?.addEventListener("click", (e) => {
+    e.preventDefault();
+    signupForm.classList.add("hidden");
+    loginForm.classList.remove("hidden");
+    messageBox.textContent = "";
+  });
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/create-user`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
+  // Xử lý đăng ký
+  btnSend?.addEventListener("click", async () => {
+    const email = document.getElementById("signup-email").value.trim();
+    if (!email) return showMessage("Vui lòng nhập email", "error");
 
-            const data = await response.json();
-            if (response.ok) {
-                message.textContent = "Mã PIN đã được gửi đến email của bạn!";
-                loginForm.style.display = "none";
-                pinForm.style.display = "block";
-            } else {
-                message.textContent = data.error || "Có lỗi xảy ra!";
-            }
-        } catch (error) {
-            message.textContent = "Không thể kết nối đến server!";
-        }
-    });
+    try {
+      const res = await fetch("https://n8n.thanhhai217.com/webhook/create-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
 
-    // 🔑 Xử lý khi user nhập mã PIN
-    pinForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
-        const pin = pinInput.value.trim();
-        const email = emailInput.value.trim();
+      const data = await res.json();
 
-        if (!pin) {
-            message.textContent = "Vui lòng nhập mã PIN!";
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/verify-pin`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, pin }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                localStorage.setItem("userEmail", email); // Lưu trạng thái đăng nhập
-                window.location.href = "dashboard.html"; // Chuyển hướng đến trang chính
-            } else {
-                message.textContent = data.error || "Mã PIN không đúng!";
-            }
-        } catch (error) {
-            message.textContent = "Không thể kết nối đến server!";
-        }
-    });
-
-    // 🛠️ Kiểm tra nếu user đã đăng nhập trước đó
-    const savedEmail = localStorage.getItem("userEmail");
-    if (savedEmail) {
-        window.location.href = "dashboard.html"; // Nếu đã đăng nhập, chuyển đến dashboard
+      if (data.status === "error" && data.message === "Email has been used") {
+        showMessage("Email đã được sử dụng. Vui lòng đăng nhập!", "error");
+        signupForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+        document.getElementById("email").value = email;
+      } else {
+        showMessage("Mã PIN đã được gửi đến email của bạn!");
+        signupForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+        document.getElementById("email").value = email;
+      }
+    } catch (err) {
+      console.error(err);
+      showMessage("Có lỗi xảy ra khi gửi email", "error");
     }
+  });
+
+  // Xử lý đăng nhập
+btnLogin?.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const pin = document.getElementById("pin").value.trim();
+  if (!email || !pin) return showMessage("Vui lòng nhập đầy đủ thông tin", "error");
+
+  try {
+    const res = await fetch("https://n8n.thanhhai217.com/webhook/verify-pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, pin })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      localStorage.setItem("user_email", email); // 🟢 Đây là dòng lưu phiên đăng nhập
+      window.location.href = "pages/dashboard.html";
+    } else {
+      showMessage("Mã PIN không đúng hoặc hết hạn!", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showMessage("Có lỗi xảy ra khi đăng nhập", "error");
+  }
+});
+
 });

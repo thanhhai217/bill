@@ -1,30 +1,34 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bill Manager - Đăng nhập</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <script src="assets/utils.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Đăng nhập / Đăng ký</title>
+  <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
-    <div class="container">
-        <h2>Đăng nhập / Đăng ký</h2>
-        <form id="login-form">
-            <label for="email">Nhập Email:</label>
-            <input type="email" id="email" required>
-            <button type="submit">Tiếp tục</button>
-        </form>
-
-        <form id="pin-form" style="display: none;">
-            <label for="pin">Nhập mã PIN:</label>
-            <input type="text" id="pin" required>
-            <button type="submit">Đăng nhập</button>
-        </form>
-
-        <p id="message"></p>
+  <div class="auth-container">
+    <!-- Form Đăng nhập -->
+    <div id="login-form">
+      <h2>Nhập email của bạn để<br/>đăng nhập</h2>
+      <input type="email" id="email" placeholder="Email" />
+      <input type="text" id="pin" placeholder="Passcode" />
+      <p>hoặc <a href="#" id="switch-to-signup">Đăng ký</a></p>
+      <button id="btn-login">Đăng nhập</button>
     </div>
 
-    <script src="assets/script.js"></script>
+    <!-- Form Đăng ký (ẩn mặc định) -->
+    <div id="signup-form" class="hidden">
+      <h2>Nhập email của bạn để<br/>đăng ký</h2>
+      <input type="email" id="signup-email" placeholder="Email" />
+      <p>hoặc <a href="#" id="switch-to-login">Đăng nhập</a></p>
+      <button id="btn-send">Tiếp tục</button>
+    </div>
+
+    <!-- Thông báo -->
+    <div id="message" class="message"></div>
+  </div>
+
+  <script src="assets/script.js"></script>
 </body>
 </html>

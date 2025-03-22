@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", async function () {
-    const userEmail = localStorage.getItem("userEmail");
+    const userEmail = localStorage.getItem("user_email");
     const userEmailSpan = document.getElementById("user-email");
     const billsContainer = document.getElementById("bills-container");
     const createBillBtn = document.getElementById("create-bill-btn");
     const logoutBtn = document.getElementById("logout-btn");
 
     if (!userEmail) {
-        window.location.href = "index.html"; // Chuyển hướng nếu chưa đăng nhập
+        window.location.href = "../index.html"; // Chuyển hướng nếu chưa đăng nhập
         return;
     }
 
@@ -53,8 +53,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // 🚪 Nút đăng xuất
     logoutBtn.addEventListener("click", function () {
-        localStorage.removeItem("userEmail");
-        window.location.href = "index.html";
+        localStorage.removeItem("user_email");
+        window.location.href = "../index.html";
     });
 
     // 🚀 Load danh sách bill khi trang load
