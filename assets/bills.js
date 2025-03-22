@@ -1,119 +1,109 @@
 // assets/bills.js
-document.addEventListener("DOMContentLoaded", async function () {
-  const userEmail = localStorage.getItem("user_email");
-  const sessionToken = localStorage.getItem("session_token");
-  const loginTimestamp = localStorage.getItem("login_timestamp");
-  const userEmailSpan = document.getElementById("user-email");
-  const billsContainer = document.getElementById("bills-container");
-  const createBillBtn = document.getElementById("create-bill-btn");
-  const logoutBtn = document.getElementById("logout-btn");
 
-  // Kiểm tra phiên đăng nhập
-  const isSessionValid = await checkAuth();
-  if (!isSessionValid) return;
+// Hàm kiểm tra phiên người dùng
+async function checkSession() {
+  // Lấy thông tin từ localStorage
+  const sessionToken = localStorage.getItem('session_token');
+  const userEmail = localStorage.getItem('user_email');
+  const loginTimestamp = localStorage.getItem('login_timestamp');
 
-  // Hàm kiểm tra phiên
-  async function checkAuth() {
-    console.log("Checking session:", { userEmail, sessionToken, loginTimestamp });
-
-    if (!userEmail || !sessionToken) {
-      console.warn("Missing email or token in localStorage");
-      redirectToLogin();
-      return false;
-    }
-
-    // Kiểm tra thời gian hết hạn (1 tháng)
-    const oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
-    const currentTime = Date.now();
-    if (currentTime - loginTimestamp > oneMonthInMs) {
-      console.warn("Session expired due to timeout");
-      localStorage.clear();
-      redirectToLogin();
-      return false;
-    }
-
-    // Kiểm tra session token từ server
-    try {
-      const res = await fetch("https://n8n.thanhhai217.com/webhook/verify-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail, session_token: sessionToken })
-      });
-      const data = await res.json();
-      console.log("Verify-session response:", data);
-
-      if (data.status !== "success") {
-        console.warn("Invalid session:", data.message);
-        localStorage.clear();
-        redirectToLogin();
-        return false;
-      }
-
-      console.log("Session verified successfully");
-      userEmailSpan.textContent = userEmail;
-      return true;
-    } catch (err) {
-      console.error("Error verifying session:", err);
-      billsContainer.innerHTML = "<p>Lỗi kết nối server. Vui lòng thử lại sau.</p>";
-      return false;
-    }
+  // Kiểm tra xem các giá trị cần thiết có tồn tại không
+  if (!sessionToken || !userEmail || !loginTimestamp) {
+    console.log('Missing session token, email, or login timestamp. Redirecting to login...');
+    window.location.href = '/index.html';
+    return false;
   }
 
-  // Hàm chuyển hướng về login
-  function redirectToLogin() {
-    console.warn("Redirecting to login page...");
-    window.location.href = "../index.html";
+  // Kiểm tra thời gian hết hạn (1 tháng = 30 ngày = 30 * 24 * 60 * 60 * 1000 milliseconds)
+  const oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
+  const currentTime = Date.now();
+  const timeSinceLogin = currentTime - parseInt(loginTimestamp, 10);
+
+  if (timeSinceLogin > oneMonthInMs) {
+    console.log('Session expired (over 1 month). Redirecting to login...');
+    localStorage.clear(); // Xóa localStorage để yêu cầu đăng nhập lại
+    window.location.href = '/index.html';
+    return false;
   }
 
-  // Hàm tải danh sách hóa đơn
-  async function loadBills() {
-    try {
-      const billsData = await getUserBills(userEmail);
-      console.log("Bills data:", billsData);
-      billsContainer.innerHTML = "";
+  try {
+    // Gọi API verify-session để kiểm tra phiên
+    const response = await fetch('https://n8n.thanhhai217.com/webhook/verify-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session_token: sessionToken,
+        email: userEmail,
+      }),
+    });
 
-      if (!billsData.bills || billsData.bills.length === 0) {
-        billsContainer.innerHTML = "<p>Không có hóa đơn nào.</p>";
-        return;
-      }
+    const data = await response.json();
 
-      billsData.bills.forEach(bill => {
-        const billElement = document.createElement("div");
-        billElement.classList.add("bill");
-
-        billElement.innerHTML = `
-          <p><strong>${bill.purpose}</strong> - ${bill.date}</p>
-          <p>Số tiền: <strong>${bill.total_amount} VND</strong></p>
-          <p>Trạng thái: <span class="${bill.status === 'Đã thanh toán' ? 'paid' : 'unpaid'}">${bill.status}</span></p>
-          <button onclick="viewBill(${bill.bill_id})">Xem chi tiết</button>
-        `;
-
-        billsContainer.appendChild(billElement);
-      });
-    } catch (error) {
-      console.error("Error loading bills:", error);
-      billsContainer.innerHTML = "<p>Lỗi khi tải hóa đơn.</p>";
+    if (data.status === 'success') {
+      console.log('Session verified successfully');
+      return true; // Phiên hợp lệ, tiếp tục tải dữ liệu
+    } else {
+      console.log('Session verification failed:', data.message);
+      localStorage.clear(); // Xóa localStorage nếu token không hợp lệ
+      window.location.href = '/index.html'; // Chuyển hướng về trang đăng nhập
+      return false;
     }
+  } catch (error) {
+    console.error('Error verifying session:', error);
+    alert('Lỗi kết nối server. Vui lòng thử lại sau.');
+    return false;
+  }
+}
+
+// Hàm tải danh sách hóa đơn (giả lập - bạn có thể thay thế bằng API thật)
+async function fetchBills() {
+  // Giả lập dữ liệu hóa đơn, bạn có thể thay bằng API thực tế
+  const bills = [
+    { id: 1, description: 'Hóa đơn 1', amount: 100, date: '2025-03-22' },
+    { id: 2, description: 'Hóa đơn 2', amount: 200, date: '2025-03-23' },
+  ];
+
+  const billList = document.getElementById('bill-list');
+  if (!billList) {
+    console.error('Element with ID "bill-list" not found.');
+    return;
   }
 
-  // Hàm xem chi tiết hóa đơn
-  window.viewBill = function (billId) {
-    window.location.href = `bill-details.html?bill_id=${billId}`;
-  };
+  billList.innerHTML = ''; // Xóa nội dung cũ
 
-  // Nút tạo hóa đơn mới
-  createBillBtn.addEventListener("click", function () {
-    window.location.href = "create-bill.html";
+  bills.forEach(bill => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${bill.id}</td>
+      <td>${bill.description}</td>
+      <td>${bill.amount}</td>
+      <td>${bill.date}</td>
+    `;
+    billList.appendChild(row);
   });
+}
 
-  // Nút đăng xuất
-  logoutBtn.addEventListener("click", function () {
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("session_token");
-    localStorage.removeItem("login_timestamp");
-    window.location.href = "../index.html";
-  });
+// Hàm đăng xuất
+function logout() {
+  localStorage.clear(); // Xóa localStorage khi đăng xuất
+  window.location.href = '/index.html'; // Chuyển hướng về trang đăng nhập
+}
 
-  // Tải danh sách hóa đơn nếu phiên hợp lệ
-  loadBills();
+// Khởi chạy khi trang dashboard.html được tải
+document.addEventListener('DOMContentLoaded', async () => {
+  // Kiểm tra phiên trước khi làm bất kỳ việc gì
+  const isSessionValid = await checkSession();
+
+  if (isSessionValid) {
+    // Nếu phiên hợp lệ, tải danh sách hóa đơn
+    await fetchBills();
+  }
+
+  // Gắn sự kiện cho nút đăng xuất (nếu có)
+  const logoutButton = document.getElementById('logout-button');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', logout);
+  }
 });
