@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chi tiết hóa đơn</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Chi tiết hóa đơn</h2>   
+    <div id="bill-info">
+      <p>Đang tải...</p>
+    </div>
+    <button onclick="window.history.back()">⬅ Quay lại</button>
+  </div>
+
+  <script src="../assets/api.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const billId = urlParams.get("bill_id");
+      const userEmail = localStorage.getItem("userEmail");
+      const billInfo = document.getElementById("bill-info");
+
+      if (!billId || !userEmail) {
+        billInfo.innerHTML = "<p>Dữ liệu không hợp lệ!</p>";
+        return;
+      }
+
+      const data = await getUserBills(userEmail);
+      const bill = data.bills.find(b => b.bill_id == billId);
+
+      if (!bill) {
+        billInfo.innerHTML = "<p>Không tìm thấy hóa đơn.</p>";
+        return;
+      }
+
+      billInfo.innerHTML = `
+        <p><strong>Mục đích:</strong> ${bill.purpose}</p>
+        <p><strong>Ngày:</strong> ${bill.date}</p>
+        <p><strong>Tổng tiền:</strong> ${bill.total_amount} VND</p>
+        <p><strong>Trạng thái:</strong> <span class="${bill.status === 'Đã thanh toán' ? 'paid' : 'unpaid'}">${bill.status}</span></p>
+        <p><strong>Phải trả:</strong> ${bill.amount_due} VND</p>
+        <p><strong>Đã thanh toán:</strong> ${bill.is_paid ? '✅ Có' : '❌ Chưa'}</p>
+        ${!bill.is_paid && userEmail !== bill.creator_email
+          ? `<button onclick="handlePayment(${bill.bill_id})">Tôi đã thanh toán</button>`
+          : ""
+        }
+      `;
+    });
+
+    async function handlePayment(billId) {
+      const email = localStorage.getItem("userEmail");
+      const result = await updatePayment(billId, email);
+      alert(result.message);
+      location.reload();
+    }
+  </script>
+</body>
+</html>

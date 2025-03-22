@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hồ sơ cá nhân</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Thông tin người dùng</h2>
+    <p>Email: <strong id="user-email"></strong></p>
+    <button onclick="window.history.back()">⬅ Quay lại</button>
+  </div>
+
+  <script>
+    const email = localStorage.getItem("userEmail");
+    if (!email) window.location.href = "login.html";
+    document.getElementById("user-email").textContent = email;
+  </script>
+</body>
+</html>

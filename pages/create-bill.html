@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tạo hóa đơn</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Tạo hóa đơn mới</h2>
+
+    <form id="create-form">
+      <label>Mục đích:</label>
+      <input type="text" id="purpose" required />
+
+      <label>Ngày:</label>
+      <input type="date" id="date" required />
+
+      <label>Tổng tiền (VND):</label>
+      <input type="number" id="total" required />
+
+      <label>Thành viên tham gia (email cách nhau bằng dấu phẩy):</label>
+      <input type="text" id="participants" required />
+
+      <button type="submit">Tạo hóa đơn</button>
+    </form>
+
+    <p id="message"></p>
+    <button onclick="window.history.back()">⬅ Quay lại</button>
+  </div>
+
+  <script src="../assets/api.js"></script>
+  <script>
+    document.getElementById("create-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = localStorage.getItem("userEmail");
+      const total = parseFloat(document.getElementById("total").value);
+      const people = document.getElementById("participants").value.split(",").map(s => s.trim()).filter(Boolean);
+      const amount = +(total / (people.length + 1)).toFixed(0);
+
+      const bill = {
+        purpose: document.getElementById("purpose").value,
+        date: document.getElementById("date").value,
+        total_amount: total,
+        creator_email: email,
+        qr_url: "", account_number: "", bank_name: "",
+        participants: people.map(p => ({ email: p, amount_due: amount }))
+      };
+
+      const result = await createBill(bill);
+      document.getElementById("message").textContent = result.message || "Tạo bill thành công!";
+    });
+  </script>
+</body>
+</html>
