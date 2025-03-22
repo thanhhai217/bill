@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Xử lý đăng nhập
+// assets/script.js
 btnLogin?.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const pin = document.getElementById("pin").value.trim();
@@ -77,7 +78,10 @@ btnLogin?.addEventListener("click", async () => {
     const data = await res.json();
 
     if (data.status === "success") {
-      localStorage.setItem("user_email", email); // 🟢 Đây là dòng lưu phiên đăng nhập
+      // Lưu thông tin phiên vào localStorage
+      localStorage.setItem("user_email", email);
+      localStorage.setItem("session_token", data.session_token || "temp-token"); // Server cần trả về token
+      localStorage.setItem("login_timestamp", Date.now()); // Thời gian đăng nhập (milliseconds)
       window.location.href = "pages/dashboard.html";
     } else {
       showMessage("Mã PIN không đúng hoặc hết hạn!", "error");

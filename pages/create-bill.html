@@ -2,55 +2,63 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tạo hóa đơn</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chia tiền - Tạo hóa đơn</title>
   <link rel="stylesheet" href="../assets/styles.css" />
 </head>
 <body>
   <div class="container">
-    <h2>Tạo hóa đơn mới</h2>
+    <h2 class="center-text">Chia tiền</h2>
 
-    <form id="create-form">
-      <label>Mục đích:</label>
-      <input type="text" id="purpose" required />
+    <div class="input-group amount-group">
+      <input
+        type="number"
+        id="total-amount"
+        placeholder="0"
+        class="amount-input"
+        inputmode="numeric"
+      />
+      <span class="currency">đ</span>
+    </div>
 
-      <label>Ngày:</label>
-      <input type="date" id="date" required />
+    <div class="form-group">
+      <label for="purpose">Loại ghi chú</label>
+      <input type="text" id="purpose" placeholder="Thêm chi tiêu" />
+    </div>
 
-      <label>Tổng tiền (VND):</label>
-      <input type="number" id="total" required />
+    <div class="form-group">
+      <label for="date">Thời gian</label>
+      <input type="date" id="date" />
+    </div>
 
-      <label>Thành viên tham gia (email cách nhau bằng dấu phẩy):</label>
-      <input type="text" id="participants" required />
+    <div class="form-group">
+      <label for="paid-by">Trả bởi</label>
+      <select id="paid-by">
+        <!-- Sẽ được đổ dữ liệu từ JS -->
+      </select>
+    </div>
 
-      <button type="submit">Tạo hóa đơn</button>
-    </form>
+    <div class="form-group">
+      <label for="members">Chia hoá đơn</label>
+      <select id="members" multiple>
+        <!-- Danh sách thành viên, hiển thị bằng JS dưới dạng modal hoặc select box -->
+      </select>
+    </div>
 
-    <p id="message"></p>
-    <button onclick="window.history.back()">⬅ Quay lại</button>
+    <div class="form-group">
+      <label for="receipt">Ảnh hóa đơn (tuỳ chọn)</label>
+      <input type="file" id="receipt" accept="image/*" />
+    </div>
+
+    <div class="form-group">
+      <label for="qr">Ảnh QR thanh toán (tuỳ chọn)</label>
+      <input type="file" id="qr" accept="image/*" />
+    </div>
+
+    <button id="submit-bill" class="btn primary full-width">Thêm chi tiêu</button>
+    <p id="message" class="message"></p>
   </div>
 
-  <script src="../assets/api.js"></script>
-  <script>
-    document.getElementById("create-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = localStorage.getItem("userEmail");
-      const total = parseFloat(document.getElementById("total").value);
-      const people = document.getElementById("participants").value.split(",").map(s => s.trim()).filter(Boolean);
-      const amount = +(total / (people.length + 1)).toFixed(0);
-
-      const bill = {
-        purpose: document.getElementById("purpose").value,
-        date: document.getElementById("date").value,
-        total_amount: total,
-        creator_email: email,
-        qr_url: "", account_number: "", bank_name: "",
-        participants: people.map(p => ({ email: p, amount_due: amount }))
-      };
-
-      const result = await createBill(bill);
-      document.getElementById("message").textContent = result.message || "Tạo bill thành công!";
-    });
-  </script>
+  <script src="../assets/create-bill.js"></script>
 </body>
 </html>
