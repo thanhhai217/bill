@@ -72,8 +72,15 @@
     </div>
   </div>
 
-  <script src="../assets/create-bill.js"></script>
-  <!-- Thêm flatpickr -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    // Khởi tạo Flatpickr cho trường date
+    flatpickr("#date", {
+      dateFormat: "d/m/Y",
+      defaultDate: "today",
+      enableTime: false,
+    });
+  </script>
+  <script src="../assets/create-bill.js"></script>
 </body>
 </html>

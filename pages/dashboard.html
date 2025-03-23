@@ -14,6 +14,7 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+      display: none; /* Ẩn bảng mặc định, sẽ hiển thị qua JavaScript nếu có hóa đơn */
     }
     th, td {
       border: 1px solid #ddd;
@@ -38,6 +39,12 @@
       color: white;
       border: none;
     }
+    #no-bills-message {
+      display: none; /* Ẩn thông báo mặc định, sẽ hiển thị qua JavaScript nếu không có hóa đơn */
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -47,19 +54,21 @@
   <button class="btn-add">+ Tạo Bill Mới</button>
   <button class="btn-logout" id="logout-button">Đăng Xuất</button>
 
-  <h3>Đang tải danh sách hóa đơn...</h3>
-  <table>
+  <h3 id="loading-message">Đang tải danh sách hóa đơn...</h3>
+  <div id="no-bills-message">Bạn chưa có hóa đơn nào cần thanh toán</div>
+  <table id="bill-table">
     <thead>
       <tr>
         <th>ID</th>
         <th>Mô tả</th>
         <th>Số tiền</th>
         <th>Ngày</th>
+        <th>Trạng thái</th>
       </tr>
     </thead>
-    <tbody id="bill-list"></tbody> <!-- Phần tử với id="bill-list" -->
+    <tbody id="bill-list"></tbody>
   </table>
 
   <script src="../assets/bills.js"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'924e964d69c053f6',t:'MTc0MjczOTgxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
