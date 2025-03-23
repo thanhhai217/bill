@@ -593,11 +593,13 @@
 
         const data = await response.json();
 
-        if (data.status === 'success') {
+        // Kiểm tra dữ liệu trả về
+        if (Array.isArray(data) && data.length > 0) {
+          // API trả về dữ liệu, coi như thành công
           // Refresh danh sách người tham gia
           fetchBillParticipants(billId);
         } else {
-          throw new Error(data.message || 'Xác nhận thanh toán thất bại.');
+          throw new Error('Dữ liệu trả về không hợp lệ hoặc rỗng.');
         }
       } catch (error) {
         console.error('Error confirming payment:', error);
