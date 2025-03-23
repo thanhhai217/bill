@@ -1,5 +1,10 @@
 // assets/bills.js
 
+// Hàm định dạng số tiền với dấu phân cách hàng nghìn
+function formatCurrency(amount) {
+  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + 'đ';
+}
+
 // Hàm kiểm tra phiên người dùng
 async function checkSession() {
   const sessionToken = localStorage.getItem('session_token');
@@ -39,6 +44,13 @@ async function checkSession() {
 
     if (data.status === 'success') {
       console.log('Session verified successfully');
+      // Cập nhật phần chào với email
+      const greetingMessage = document.getElementById('greeting-message');
+      if (greetingMessage) {
+        greetingMessage.textContent = `Chào, ${userEmail.split('@')[0]}!`;
+      } else {
+        console.error('Greeting message element not found.');
+      }
       return true;
     } else {
       console.log('Session verification failed:', data.message);
@@ -87,56 +99,82 @@ async function fetchBills() {
 
     const billList = document.getElementById('bill-list');
     const billTable = document.getElementById('bill-table');
+    const billListMobile = document.getElementById('bill-list-mobile');
     const noBillsMessage = document.getElementById('no-bills-message');
     const loadingMessage = document.getElementById('loading-message');
 
-    if (!billList || !billTable || !noBillsMessage || !loadingMessage) {
-      console.error('Required elements not found: bill-list, bill-table, no-bills-message, or loading-message.');
+    if (!billList || !billTable || !billListMobile || !noBillsMessage || !loadingMessage) {
+      console.error('Required elements not found: bill-list, bill-table, bill-list-mobile, no-bills-message, or loading-message.');
       return;
     }
 
     // Ẩn dòng chữ "Đang tải danh sách hóa đơn..." sau khi dữ liệu được tải xong
     loadingMessage.style.display = 'none';
 
-    billList.innerHTML = ''; // Xóa nội dung cũ
+    billList.innerHTML = ''; // Xóa nội dung cũ (desktop)
+    billListMobile.innerHTML = ''; // Xóa nội dung cũ (mobile)
 
     // Kiểm tra nếu không có hóa đơn hoặc không có hóa đơn hợp lệ
     const validBills = bills.filter(bill => bill.id !== null && bill.id !== undefined);
     if (validBills.length === 0) {
       // Ẩn bảng và hiển thị thông báo
       billTable.style.display = 'none';
+      billListMobile.style.display = 'none';
       noBillsMessage.style.display = 'block';
       return;
     }
 
-    // Hiển thị bảng và ẩn thông báo
-    billTable.style.display = 'table';
+    // Hiển thị bảng (desktop) và danh sách (mobile), ẩn thông báo
+    billTable.style.display = 'table'; // Hiển thị bảng trên desktop
+    billListMobile.style.display = 'block'; // Hiển thị danh sách trên mobile
     noBillsMessage.style.display = 'none';
 
-    // Hiển thị danh sách hóa đơn
+    // Hiển thị danh sách hóa đơn trên desktop (bảng)
     validBills.forEach(bill => {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${bill.id || 'N/A'}</td>
         <td>${bill.purpose || 'Không có mô tả'}</td>
-        <td>${bill.total_amount || '0'}đ</td>
+        <td>${formatCurrency(bill.total_amount || 0)}</td>
         <td>${bill.date ? new Date(bill.date).toLocaleDateString('vi-VN') : 'N/A'}</td>
-        <td><span class="${bill.status === 'Chưa thanh toán' ? 'unpaid' : 'paid'}">${bill.status || 'N/A'}</span></td>
+        <td><span class="status ${bill.status === 'Chưa thanh toán' ? 'unpaid' : 'paid'}">${bill.status || 'N/A'}</span></td>
       `;
+      // Chuyển hướng đến bill-details.html (đã sửa đường dẫn)
+      row.addEventListener('click', () => {
+        window.location.href = `bill-details.html?id=${bill.id}`;
+      });
       billList.appendChild(row);
+    });
+
+    // Hiển thị danh sách hóa đơn trên mobile (dạng danh sách)
+    validBills.forEach(bill => {
+      const billItem = document.createElement('div');
+      billItem.classList.add('bill-item');
+      billItem.innerHTML = `
+        <div><strong>Mô tả:</strong> ${bill.purpose || 'Không có mô tả'}</div>
+        <div><strong>Số tiền:</strong> ${formatCurrency(bill.total_amount || 0)}</div>
+        <div><strong>Ngày:</strong> ${bill.date ? new Date(bill.date).toLocaleDateString('vi-VN') : 'N/A'}</div>
+        <div><strong>Trạng thái:</strong> <span class="status ${bill.status === 'Chưa thanh toán' ? 'unpaid' : 'paid'}">${bill.status || 'N/A'}</span></div>
+      `;
+      // Chuyển hướng đến bill-details.html (đã sửa đường dẫn)
+      billItem.addEventListener('click', () => {
+        window.location.href = `bill-details.html?id=${bill.id}`;
+      });
+      billListMobile.appendChild(billItem);
     });
   } catch (error) {
     console.error('Error fetching bills:', error);
     const billList = document.getElementById('bill-list');
     const billTable = document.getElementById('bill-table');
+    const billListMobile = document.getElementById('bill-list-mobile');
     const noBillsMessage = document.getElementById('no-bills-message');
     const loadingMessage = document.getElementById('loading-message');
 
-    if (billList && billTable && noBillsMessage && loadingMessage) {
-      // Ẩn dòng chữ "Đang tải danh sách hóa đơn..." khi có lỗi
+    if (billList && billTable && billListMobile && noBillsMessage && loadingMessage) {
       loadingMessage.style.display = 'none';
       billList.innerHTML = '';
       billTable.style.display = 'none';
+      billListMobile.style.display = 'none';
       noBillsMessage.style.display = 'block';
       noBillsMessage.textContent = `Lỗi khi tải danh sách hóa đơn: ${error.message}`;
     }
