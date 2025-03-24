@@ -24,22 +24,52 @@
     cursor: pointer;
 }
 
-.btn-add {
+.btn-add, .btn.green {
     background-color: #28a745; /* Màu xanh cho nút Tạo Bill Mới */
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
 }
 
-.btn-logout {
+.btn-add:hover, .btn.green:hover {
+    background-color: #218838;
+}
+
+.btn-logout, .btn.red {
     background-color: #dc3545; /* Màu đỏ cho nút Đăng Xuất */
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.btn-logout:hover, .btn.red:hover {
+    background-color: #c82333;
 }
 
 .paid {
     color: green;
     font-weight: bold;
+    background-color: #e6ffed;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-block;
 }
 
 .unpaid {
     color: crimson;
     font-weight: bold;
+    background-color: #ffe6e6;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-block;
 }
 
 .modal {
@@ -62,57 +92,131 @@
 }
 
 body {
-    font-family: "Segoe UI", sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #fafafa;
     margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    min-height: 100vh;
 }
 
-.login-container {
-    background: white;
-    padding: 30px 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
-    width: 320px;
-    text-align: center;
+/* ======= Giao diện trang đăng nhập/đăng ký ======= */
+.auth-wrapper {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.auth-box {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.auth-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.auth-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
 }
 
 input[type="email"], input[type="text"] {
-    width: 100%;
-    padding: 12px;
-    margin-top: 12px;
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #f9f9f9;
+  transition: 0.3s;
+}
+
+input[type="email"]:focus, input[type="text"]:focus {
+  border-color: #4CAF50;
+  background-color: #fff;
+  outline: none;
 }
 
 button {
-    width: 100%;
-    padding: 12px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    font-weight: bold;
-    border-radius: 8px;
-    margin-top: 10px;
-    cursor: pointer;
+  width: 100%;
+  padding: 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #218838;
+  background-color: #43a047;
 }
 
-#notice {
-    margin-top: 12px;
-    font-size: 14px;
-    color: #333;
+.switch-text {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #333;
 }
 
-/* 🔖 Style cho create-bill.html */
+.switch-text a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.switch-text a:hover {
+  text-decoration: underline;
+}
+
+.message {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #d9534f;
+}
+
+/* 📋 Giao diện Dashboard */
+.dashboard-wrapper {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.dashboard-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.dashboard-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.dashboard-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+/* 🔖 Style cho create-bill.html và bảng */
 .container {
     max-width: 400px;
     margin: 0 auto;
@@ -189,14 +293,6 @@ button:hover {
     background-image: none; /* Loại bỏ mũi tên cho select multiple */
 }
 
-.message {
-    margin-top: 10px;
-    text-align: center;
-    color: #f44336;
-    font-size: 0.9rem;
-}
-
-/* Style cho flatpickr */
 .flatpickr-input {
     width: 100%;
     padding: 10px;
@@ -205,13 +301,11 @@ button:hover {
     font-size: 1rem;
 }
 
-/* Style cho modal */
 #members-list div {
     color: #000 !important;
     -webkit-text-fill-color: #000 !important; /* Đảm bảo màu chữ trên Chrome */
 }
 
-/* Style cho bảng danh sách hóa đơn */
 table {
     width: 100%;
     border-collapse: collapse;

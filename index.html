@@ -2,33 +2,38 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Đăng nhập / Đăng ký</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="auth-container">
-    <!-- Form Đăng nhập -->
-    <div id="login-form">
-      <h2>Nhập email của bạn để<br/>đăng nhập</h2>
-      <input type="email" id="email" placeholder="Email" />
-      <input type="text" id="pin" placeholder="Passcode" />
-      <p>hoặc <a href="#" id="switch-to-signup">Đăng ký</a></p>
-      <button id="btn-login">Đăng nhập</button>
-    </div>
+  <div class="auth-wrapper">
+    <div class="auth-box">
+      <h1 class="auth-title">Chào mừng trở lại! 👋</h1>
 
-    <!-- Form Đăng ký (ẩn mặc định) -->
-    <div id="signup-form" class="hidden">
-      <h2>Nhập email của bạn để<br/>đăng ký</h2>
-      <input type="email" id="signup-email" placeholder="Email" />
-      <p>hoặc <a href="#" id="switch-to-login">Đăng nhập</a></p>
-      <button id="btn-send">Tiếp tục</button>
-    </div>
+      <!-- Form Đăng nhập -->
+      <div id="login-form">
+        <p class="auth-subtitle">Đăng nhập để tiếp tục</p>
+        <input type="email" id="email" placeholder="Email" />
+        <input type="text" id="pin" placeholder="Mã bảo mật" />
+        <p class="switch-text">Chưa có tài khoản? <a href="#" id="switch-to-signup">Đăng ký</a></p>
+        <button id="btn-login">Đăng nhập</button>
+      </div>
 
-    <!-- Thông báo -->
-    <div id="message" class="message"></div>
+      <!-- Form Đăng ký (ẩn mặc định) -->
+      <div id="signup-form" class="hidden">
+        <p class="auth-subtitle">Tạo tài khoản mới</p>
+        <input type="email" id="signup-email" placeholder="Email" />
+        <p class="switch-text">Đã có tài khoản? <a href="#" id="switch-to-login">Đăng nhập</a></p>
+        <button id="btn-send">Tiếp tục</button>
+      </div>
+
+      <div id="message" class="message"></div>
+    </div>
   </div>
-
   <script src="assets/script.js"></script>
 </body>
 </html>
