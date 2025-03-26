@@ -220,6 +220,8 @@ document.getElementById('submit-bill').addEventListener('click', async () => {
   });
   const receipt = document.getElementById('receipt').files[0];
   const qr = document.getElementById('qr').files[0];
+  const accountNumber = document.getElementById('bank-account').value.trim();
+  const bankName = document.getElementById('bank-name').value.trim();
 
   if (!totalAmount || !purpose || !selectedDate || !paidBy || selectedMembers.length === 0) {
     document.getElementById('message').textContent = 'Vui lòng điền đầy đủ thông tin bắt buộc.';
@@ -238,8 +240,8 @@ document.getElementById('submit-bill').addEventListener('click', async () => {
   formData.append('paid_by', paidBy);
   formData.append('members', JSON.stringify(selectedMembers));
   formData.append('creator_email', userEmail);
-  formData.append('account_number', '');
-  formData.append('bank_name', '');
+  formData.append('account_number', accountNumber); // Lấy giá trị từ input
+  formData.append('bank_name', bankName); // Lấy giá trị từ input
   formData.append('receipt', receipt || '');
   formData.append('qr', qr || '');
   formData.append('session_token', sessionToken);
@@ -250,22 +252,14 @@ document.getElementById('submit-bill').addEventListener('click', async () => {
       method: 'POST',
       body: formData,
     });
-    console.log('Response status:', response.status);
-    console.log('Response headers:', response.headers.get('Content-Type'));
-    const result = await response.json();
-    console.log('Parsed result:', result);
-    console.log('Result status (raw):', result.status);
-    console.log('Result status (trimmed):', result.status.trim());
 
-    const status = result.status ? result.status.trim() : '';
-    if (result && status === 'success') {
-      console.log('Processing success response:', result);
+    const result = await response.json();
+    if (result && result.status.trim() === 'success') {
       document.getElementById('message').textContent = `Thêm chi tiêu thành công! Hóa đơn ID: ${result.bill_id}`;
       setTimeout(() => {
         window.location.href = 'dashboard.html';
       }, 2000);
     } else {
-      console.log('Processing error response:', result);
       document.getElementById('message').textContent = `Lỗi: ${result?.message || 'Không có thông báo lỗi'}`;
       submitButton.disabled = false;
     }

@@ -434,6 +434,8 @@
           <div><strong>Số tiền:</strong> ${formatCurrency(bill.total_amount || 0)}</div>
           <div><strong>Ngày:</strong> ${bill.date ? new Date(bill.date).toLocaleDateString('vi-VN') : 'N/A'}</div>
           <div><strong>Trạng thái:</strong> <span class="status ${bill.status === 'Chưa thanh toán' ? 'unpaid' : 'paid'}">${bill.status || 'N/A'}</span></div>
+          <div><strong>Số tài khoản:</strong> ${bill.account_number || 'N/A'}</div>
+          <div><strong>Tên ngân hàng:</strong> ${bill.bank_name || 'N/A'}</div>
         `;
 
         // Sau khi lấy chi tiết hóa đơn, gọi API để lấy danh sách người tham gia

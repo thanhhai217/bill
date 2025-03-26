@@ -108,15 +108,43 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center; /* Thêm dòng này để căn giữa theo chiều ngang */
   min-height: 100vh;
 }
 
 .auth-box {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  padding: 40px 30px;
-  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-box input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.auth-box button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-box button:hover {
+  background-color: #43a047;
 }
 
 .auth-title {
@@ -304,6 +332,17 @@ button:hover {
 #members-list div {
     color: #000 !important;
     -webkit-text-fill-color: #000 !important; /* Đảm bảo màu chữ trên Chrome */
+}
+
+#bank-account,
+#bank-name {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
 }
 
 table {
