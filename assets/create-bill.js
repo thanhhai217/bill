@@ -1,5 +1,10 @@
 let membersWithAmount = [];
 
+// Helper function to parse formatted number
+function parseFormattedNumber(value) {
+  return parseInt(value.toString().replace(/\D/g, '')) || 0;
+}
+
 // Kiểm tra phiên đăng nhập
 async function checkSession() {
   const sessionToken = localStorage.getItem('session_token');
@@ -59,14 +64,14 @@ async function fetchMembers() {
 
 // Cập nhật số tiền chia cho từng thành viên
 function updateAmounts(totalAmount) {
-  // Convert totalAmount to number and handle invalid values
-  totalAmount = Number(totalAmount) || 0;
+  // Parse formatted amount to number
+  totalAmount = parseFormattedNumber(totalAmount);
   
   // Get all checked members
   const checkedMembers = Array.from(document.querySelectorAll('#members-list input[type="checkbox"]:checked'));
   
-  // Calculate amount per person (rounded to nearest integer)
-  const perPerson = checkedMembers.length > 0 ? Math.round(totalAmount / checkedMembers.length) : 0;
+  // Calculate amount per person (floor to ensure no overcharge)
+  const perPerson = checkedMembers.length > 0 ? Math.floor(totalAmount / checkedMembers.length) : 0;
   
   // Update UI and data for each member
   membersWithAmount.forEach(member => {
@@ -75,25 +80,16 @@ function updateAmounts(totalAmount) {
     
     if (checkbox && amountSpan) {
       if (checkbox.checked) {
-        // Update amount for selected member
         member.amount_due = perPerson;
         amountSpan.textContent = `${perPerson.toLocaleString('vi-VN')}đ`;
       } else {
-        // Reset amount for unselected member
         member.amount_due = 0;
         amountSpan.textContent = '0đ';
       }
     }
   });
 
-  // Update selected count
   document.getElementById('selected-count').textContent = checkedMembers.length;
-
-  // For debugging
-  console.log('Total amount:', totalAmount);
-  console.log('Per person:', perPerson);
-  console.log('Selected members:', checkedMembers.length);
-  console.log('Updated amounts:', membersWithAmount);
 }
 
 // Hàm chung để hiển thị/ẩn modal
@@ -165,9 +161,7 @@ async function populateSelectBoxes() {
     membersList.appendChild(row);
 
     cb.addEventListener('change', () => {
-      const totalAmount = document.getElementById('total-amount').value;
-      console.log('Checkbox changed, total amount:', totalAmount); // For debugging
-      updateAmounts(totalAmount);
+      updateAmounts(document.getElementById('total-amount').value);
     });
   });
 
@@ -177,22 +171,25 @@ async function populateSelectBoxes() {
   document.getElementById('select-all').addEventListener('click', (e) => {
     e.preventDefault();
     document.querySelectorAll('#members-list input[type="checkbox"]').forEach(cb => cb.checked = true);
-    updateAmounts(parseFloat(document.getElementById('total-amount').value) || 0);
+    updateAmounts(document.getElementById('total-amount').value);
   });
 
   document.getElementById('unselect-all').addEventListener('click', (e) => {
     e.preventDefault();
     document.querySelectorAll('#members-list input[type="checkbox"]').forEach(cb => cb.checked = false);
-    updateAmounts(parseFloat(document.getElementById('total-amount').value) || 0);
+    updateAmounts(document.getElementById('total-amount').value);
   });
 
-  // Thiết lập sự kiện cho input số tiền (chỉ một lần)
-  document.getElementById('total-amount').addEventListener('input', (e) => {
-    console.log('Amount changed:', e.target.value); // For debugging
-    updateAmounts(e.target.value);
+  // Thiết lập sự kiện cho input số tiền
+  document.getElementById('total-amount').addEventListener('input', function(e) {
+    // Format số tiền
+    let value = this.value.replace(/\D/g, '');
+    if (value) {
+      this.value = parseInt(value).toLocaleString('vi-VN');
+    }
+    // Cập nhật số tiền chia
+    updateAmounts(this.value);
   });
-
-  updateAmounts(parseFloat(document.getElementById('total-amount').value) || 0);
 }
 
 // Xử lý sự kiện cho các nút trong modal
@@ -252,7 +249,7 @@ async function handleSubmitBill(event) {
     }
 
     const formData = new FormData();
-    formData.append('total_amount', totalAmount);
+    formData.append('total_amount', parseFormattedNumber(totalAmount));
     formData.append('purpose', purpose);
     formData.append('date', selectedDate);
     formData.append('paid_by', paidBy);
