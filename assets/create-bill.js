@@ -1,5 +1,3 @@
-// ✅ File: create-bill.js - Đã nâng cấp với các tính năng thông minh chia tiền
-
 let membersWithAmount = [];
 
 // Kiểm tra phiên đăng nhập
@@ -28,8 +26,10 @@ async function checkSession() {
     });
     const data = await res.json();
     return data.status === 'success';
-  } catch {
-    alert('Lỗi kết nối server.');
+  } catch (error) {
+    console.error('Session check error:', error);
+    alert('Lỗi kết nối server. Vui lòng đăng nhập lại.');
+    window.location.href = '/index.html';
     return false;
   }
 }
@@ -44,42 +44,82 @@ async function fetchMembers() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session_token: sessionToken, email: userEmail })
     });
+    
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.status}`);
+    }
+    
     return await res.json();
-  } catch {
-    document.getElementById('message').textContent = 'Không thể lấy danh sách người dùng.';
+  } catch (error) {
+    console.error('Fetch members error:', error);
+    document.getElementById('message').textContent = 'Không thể lấy danh sách người dùng. Vui lòng thử lại.';
     return [];
   }
 }
 
 // Cập nhật số tiền chia cho từng thành viên
 function updateAmounts(totalAmount) {
-  const checked = membersWithAmount.filter(m => {
-    const cb = document.querySelector(`input[data-email="${m.email}"]`);
-    return cb?.checked;
-  });
-  const perPerson = checked.length > 0 ? Math.round(totalAmount / checked.length) : 0;
-
+  // Convert totalAmount to number and handle invalid values
+  totalAmount = Number(totalAmount) || 0;
+  
+  // Get all checked members
+  const checkedMembers = Array.from(document.querySelectorAll('#members-list input[type="checkbox"]:checked'));
+  
+  // Calculate amount per person (rounded to nearest integer)
+  const perPerson = checkedMembers.length > 0 ? Math.round(totalAmount / checkedMembers.length) : 0;
+  
+  // Update UI and data for each member
   membersWithAmount.forEach(member => {
-    const cb = document.querySelector(`input[data-email="${member.email}"]`);
+    const checkbox = document.querySelector(`input[data-email="${member.email}"]`);
     const amountSpan = document.querySelector(`span[data-amount="${member.email}"]`);
-    if (cb?.checked) {
-      member.amount_due = perPerson;
-      if (amountSpan) amountSpan.textContent = `${perPerson.toLocaleString('vi-VN')}đ`;
-    } else {
-      member.amount_due = 0;
-      if (amountSpan) amountSpan.textContent = '0đ';
+    
+    if (checkbox && amountSpan) {
+      if (checkbox.checked) {
+        // Update amount for selected member
+        member.amount_due = perPerson;
+        amountSpan.textContent = `${perPerson.toLocaleString('vi-VN')}đ`;
+      } else {
+        // Reset amount for unselected member
+        member.amount_due = 0;
+        amountSpan.textContent = '0đ';
+      }
     }
   });
 
-  document.getElementById('selected-count').textContent = checked.length;
+  // Update selected count
+  document.getElementById('selected-count').textContent = checkedMembers.length;
+
+  // For debugging
+  console.log('Total amount:', totalAmount);
+  console.log('Per person:', perPerson);
+  console.log('Selected members:', checkedMembers.length);
+  console.log('Updated amounts:', membersWithAmount);
+}
+
+// Hàm chung để hiển thị/ẩn modal
+function toggleModal(modalId, show) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList[show ? 'remove' : 'add']('hidden');
+  }
+}
+
+// Hàm chung để lấy danh sách thành viên đã chọn
+function getSelectedMembers() {
+  return Array.from(document.querySelectorAll('#members-list input[type="checkbox"]:checked')).map(cb => {
+    const member = membersWithAmount.find(m => m.email === cb.dataset.email);
+    return { email: member.email, amount_due: member.amount_due };
+  });
 }
 
 // Tải danh sách thành viên và hiển thị trong modal
 async function populateSelectBoxes() {
   const members = await fetchMembers();
+  if (!members.length) return;
+
   const paidBySelect = document.getElementById('paid-by');
-  paidBySelect.innerHTML = '<option disabled selected>Chọn người trả</option>';
   members.forEach(m => {
+    if ([...paidBySelect.options].some(option => option.value === m.email)) return;
     const opt = document.createElement('option');
     opt.value = m.email;
     opt.textContent = m.email.split('@')[0];
@@ -125,71 +165,102 @@ async function populateSelectBoxes() {
     membersList.appendChild(row);
 
     cb.addEventListener('change', () => {
-      const total = parseFloat(document.getElementById('total-amount').value) || 0;
-      updateAmounts(total);
+      const totalAmount = document.getElementById('total-amount').value;
+      console.log('Checkbox changed, total amount:', totalAmount); // For debugging
+      updateAmounts(totalAmount);
     });
   });
 
-  document.getElementById('select-all').addEventListener('click', () => {
+  setupModalEvents();
+
+  // Thiết lập sự kiện cho các nút chọn/bỏ chọn tất cả
+  document.getElementById('select-all').addEventListener('click', (e) => {
+    e.preventDefault();
     document.querySelectorAll('#members-list input[type="checkbox"]').forEach(cb => cb.checked = true);
     updateAmounts(parseFloat(document.getElementById('total-amount').value) || 0);
   });
-  document.getElementById('unselect-all').addEventListener('click', () => {
+
+  document.getElementById('unselect-all').addEventListener('click', (e) => {
+    e.preventDefault();
     document.querySelectorAll('#members-list input[type="checkbox"]').forEach(cb => cb.checked = false);
     updateAmounts(parseFloat(document.getElementById('total-amount').value) || 0);
   });
 
-  document.getElementById('total-amount').addEventListener('input', () => {
-    updateAmounts(parseFloat(document.getElementById('total-amount').value) || 0);
+  // Thiết lập sự kiện cho input số tiền (chỉ một lần)
+  document.getElementById('total-amount').addEventListener('input', (e) => {
+    console.log('Amount changed:', e.target.value); // For debugging
+    updateAmounts(e.target.value);
   });
 
   updateAmounts(parseFloat(document.getElementById('total-amount').value) || 0);
 }
 
-// Xử lý sự kiện khi nhấn nút "Chọn người chia hóa đơn"
-document.getElementById('open-members-modal').addEventListener('click', () => {
-  const modal = document.getElementById('members-modal');
-  modal.classList.remove('hidden'); // Hiển thị modal
-});
+// Xử lý sự kiện cho các nút trong modal
+function setupModalEvents() {
+  const dropdownButton = document.getElementById('split-bill-dropdown');
+  const saveMembersButton = document.getElementById('save-members');
 
-// Xử lý sự kiện khi nhấn nút "Hủy" trong modal
-document.getElementById('close-members-modal').addEventListener('click', () => {
-  const modal = document.getElementById('members-modal');
-  modal.classList.add('hidden'); // Ẩn modal
-});
+  if (dropdownButton && saveMembersButton) {
+    dropdownButton.addEventListener('click', () => {
+      toggleModal('members-modal', true);
+    });
 
-// Xử lý sự kiện khi nhấn nút "Thêm chi tiêu"
-document.getElementById('submit-bill').addEventListener('click', async () => {
-  const totalAmount = document.getElementById('total-amount').value;
-  const purpose = document.getElementById('purpose').value;
-  const selectedDate = flatpickr.formatDate(flatpickr.parseDate(document.getElementById('date').value, 'd/m/Y'), 'Y-m-d');
-  const paidBy = document.getElementById('paid-by').value;
-  const accountNumber = document.getElementById('bank-account').value.trim();
-  const bankName = document.getElementById('bank-name').value.trim();
+    saveMembersButton.addEventListener('click', () => {
+      const selectedMembers = getSelectedMembers();
+      const totalMembers = document.querySelectorAll('#members-list input[type="checkbox"]').length;
 
-  const selectedMembers = Array.from(document.querySelectorAll('#members-list input[type="checkbox"]:checked')).map(cb => {
-    const member = membersWithAmount.find(m => m.email === cb.dataset.email);
-    return { email: member.email, amount_due: member.amount_due };
-  });
+      if (selectedMembers.length === 0) {
+        document.getElementById('message').textContent = 'Vui lòng chọn ít nhất một thành viên để chia bill.';
+        return;
+      }
 
-  if (!totalAmount || !purpose || !selectedDate || !paidBy || selectedMembers.length === 0) {
-    document.getElementById('message').textContent = 'Vui lòng điền đầy đủ thông tin bắt buộc.';
-    return;
+      dropdownButton.textContent = selectedMembers.length === totalMembers 
+        ? 'Chia đều cho tất cả' 
+        : `Chia cho ${selectedMembers.length} người`;
+
+      toggleModal('members-modal', false);
+    });
   }
+}
 
-  const creatorEmail = localStorage.getItem('user_email'); // Lấy email từ localStorage
-
-  const formData = new FormData();
-  formData.append('total_amount', totalAmount);
-  formData.append('purpose', purpose);
-  formData.append('date', selectedDate); // Định dạng ngày thành YYYY-MM-DD
-  formData.append('paid_by', paidBy);
-  formData.append('account_number', accountNumber);
-  formData.append('bank_name', bankName);
-  formData.append('members', JSON.stringify(selectedMembers));
-  formData.append('creator_email', creatorEmail); // Thêm trường creator_email
+// Xử lý sự kiện submit form
+async function handleSubmitBill(event) {
+  const submitButton = document.getElementById('submit-bill');
+  submitButton.disabled = true;
+  submitButton.textContent = 'Đang xử lý...';
 
   try {
+    // Validate input
+    const totalAmount = document.getElementById('total-amount').value;
+    const purpose = document.getElementById('purpose').value;
+    const selectedDate = flatpickr.formatDate(flatpickr.parseDate(document.getElementById('date').value, 'd/m/Y'), 'Y-m-d');
+    const paidBy = document.getElementById('paid-by').value;
+    const accountNumber = document.getElementById('bank-account').value.trim();
+    const bankName = document.getElementById('bank-name').value.trim();
+    const selectedMembers = getSelectedMembers();
+
+    const missingFields = [];
+    if (!totalAmount) missingFields.push('số tiền');
+    if (!purpose) missingFields.push('loại ghi chú');
+    if (!selectedDate) missingFields.push('thời gian');
+    if (!paidBy) missingFields.push('người trả');
+    if (selectedMembers.length === 0) missingFields.push('người tham gia');
+
+    if (missingFields.length > 0) {
+      document.getElementById('message').textContent = `Vui lòng điền: ${missingFields.join(', ')}`;
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('total_amount', totalAmount);
+    formData.append('purpose', purpose);
+    formData.append('date', selectedDate);
+    formData.append('paid_by', paidBy);
+    formData.append('account_number', accountNumber);
+    formData.append('bank_name', bankName);
+    formData.append('members', JSON.stringify(selectedMembers));
+    formData.append('creator_email', localStorage.getItem('user_email'));
+
     const response = await fetch('https://n8n.thanhhai217.com/webhook/create-bill', {
       method: 'POST',
       body: formData,
@@ -199,34 +270,47 @@ document.getElementById('submit-bill').addEventListener('click', async () => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    const text = await response.text(); // Lấy phản hồi dưới dạng văn bản
-    let result;
-    try {
-      result = JSON.parse(text); // Thử phân tích JSON
-    } catch (e) {
-      throw new Error('Phản hồi không phải JSON hợp lệ: ' + text);
-    }
+    const result = JSON.parse(await response.text());
 
     if (result.status === 'success') {
       document.getElementById('message').textContent = 'Hóa đơn đã được tạo thành công!';
+      setTimeout(() => {
+        window.location.href = '/pages/dashboard.html';
+      }, 1500);
     } else {
       document.getElementById('message').textContent = `Lỗi: ${result.message}`;
     }
   } catch (error) {
     console.error('Error submitting bill:', error);
     document.getElementById('message').textContent = 'Lỗi kết nối server hoặc phản hồi không hợp lệ.';
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Thêm chi tiêu';
   }
-});
+}
 
-// Khởi tạo flatpickr cho trường ngày
-flatpickr('#date', {
-  dateFormat: 'd/m/Y',
-  defaultDate: 'today',
-});
-
-// Kiểm tra phiên và tải dữ liệu khi trang được tải
+// Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', async () => {
   const isSessionValid = await checkSession();
   if (!isSessionValid) return;
+
+  flatpickr('#date', {
+    dateFormat: 'd/m/Y',
+    defaultDate: 'today',
+    maxDate: 'today'
+  });
+
+  const creatorEmail = localStorage.getItem('user_email');
+  const paidBySelect = document.getElementById('paid-by');
+  
+  if (creatorEmail && paidBySelect) {
+    const defaultOption = document.createElement('option');
+    defaultOption.value = creatorEmail;
+    defaultOption.textContent = creatorEmail.split('@')[0];
+    defaultOption.selected = true;
+    paidBySelect.appendChild(defaultOption);
+  }
+
   await populateSelectBoxes();
+  document.getElementById('submit-bill').addEventListener('click', handleSubmitBill);
 });

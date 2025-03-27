@@ -19,9 +19,15 @@
     background-color: #000;
     color: white;
     border: none;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 15px;
+    font-size: 1rem;
+    border-radius: 25px;
     cursor: pointer;
+    text-align: center;
+}
+
+.btn.primary:hover {
+    background-color: #333;
 }
 
 .btn-add, .btn.green {
@@ -258,7 +264,8 @@ button:hover {
 
 .center-text {
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 2rem;
+    font-weight: bold;
     margin-bottom: 20px;
 }
 
@@ -270,18 +277,22 @@ button:hover {
 }
 
 .amount-input {
-    width: 80%;
-    font-size: 2rem;
+    width: 100%;
+    font-size: 2.5rem;
     text-align: center;
     border: none;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 2px solid #ddd;
     outline: none;
     background: transparent;
+    margin-bottom: 10px;
 }
 
 .currency {
     font-size: 1.5rem;
-    margin-left: 5px;
+    color: #333;
+    display: block;
+    text-align: center;
+    margin-top: -10px;
 }
 
 .form-group {
@@ -290,9 +301,9 @@ button:hover {
 
 .form-group label {
     display: block;
+    font-size: 1rem;
+    color: #666;
     margin-bottom: 5px;
-    font-size: 0.9rem;
-    color: #333;
 }
 
 .form-group input,
@@ -326,6 +337,20 @@ button:hover {
     background-image: none; /* Loại bỏ mũi tên cho select multiple */
 }
 
+.text-center {
+  text-align: center;
+}
+.text-link {
+  color: #007bff; /* Màu xanh giống liên kết */
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.text-link:hover {
+  color: #0056b3; /* Màu xanh đậm hơn khi hover */
+  text-decoration: none;
+}
 .flatpickr-input {
     width: 100%;
     padding: 10px;
@@ -369,4 +394,73 @@ table th {
 
 table tr:hover {
     background-color: #f5f5f5;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.dropdown-button {
+  width: 100%;
+  text-align: left;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown-button:hover {
+  border-color: #bbb;
+}
+
+.dropdown-arrow {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 10px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #333;
+}
+
+.dropdown-button:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 100%;
+}
+
+.dropdown-menu.hidden {
+  display: none;
+}
+
+.dropdown-item {
+  padding: 10px;
+  color: #333;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
 }

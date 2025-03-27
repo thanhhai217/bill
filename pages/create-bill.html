@@ -1,31 +1,29 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chia tiền - Tạo hóa đơn</title>
-  <link rel="stylesheet" href="../assets/styles.css" />
-  <!-- Thêm flatpickr cho date picker -->
+  <link rel="stylesheet" href="../assets/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
   <div class="container">
-    <h2 class="center-text">Chia tiền</h2>
-
-    <div class="input-group amount-group">
+    <div class="form-group">
       <input
         type="number"
         id="total-amount"
         placeholder="0"
         class="amount-input"
         inputmode="numeric"
+        required
       />
       <span class="currency">đ</span>
     </div>
 
     <div class="form-group">
       <label for="purpose">Loại ghi chú</label>
-      <select id="purpose">
+      <select id="purpose" required>
         <option value="Ăn trưa">Ăn trưa</option>
         <option value="Ăn tối">Ăn tối</option>
         <option value="Ăn vặt">Đồ ăn nhẹ (snack, nước uống)</option>
@@ -39,35 +37,61 @@
 
     <div class="form-group">
       <label for="date">Thời gian</label>
-      <input type="text" id="date" placeholder="Hôm nay" />
+      <input 
+        type="text" 
+        id="date" 
+        placeholder="Hôm nay" 
+        class="flatpickr-input" 
+        required 
+      />
     </div>
 
     <div class="form-group">
       <label for="paid-by">Trả bởi</label>
-      <select id="paid-by"></select>
+      <select id="paid-by" required></select>
     </div>
 
     <div class="form-group">
       <label>Chia hóa đơn</label>
-      <button id="open-members-modal" class="btn">Chọn người chia hóa đơn</button>
+      <div class="dropdown">
+        <button id="split-bill-dropdown" class="dropdown-button">
+          Chia đều cho tất cả
+          <span class="dropdown-arrow"></span>
+        </button>
+      </div>
     </div>
 
     <div class="form-group">
       <label for="bank-account">Số tài khoản (tùy chọn)</label>
-      <input type="text" id="bank-account" placeholder="Nhập số tài khoản ngân hàng" />
+      <input 
+        type="text" 
+        id="bank-account" 
+        placeholder="Nhập số tài khoản ngân hàng" 
+      />
     </div>
 
     <div class="form-group">
       <label for="bank-name">Tên Ngân hàng (tùy chọn)</label>
-      <input type="text" id="bank-name" placeholder="Nhập tên ngân hàng" />
+      <input 
+        type="text" 
+        id="bank-name" 
+        placeholder="Nhập tên ngân hàng" 
+      />
     </div>
 
-    <button id="submit-bill" class="btn primary full-width">Thêm chi tiêu</button>
-    <p id="error-message" class="error-message" style="color: red; display: none;">Vui lòng điền đầy đủ thông tin bắt buộc.</p>
-    <a id="back-to-dashboard" href="../pages/dashboard.html" class="link-with-icon" style="margin-top: 30px; display: inline-flex; align-items: center;">
-      <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Back" style="width: 20px; height: 20px; margin-right: 8px;">
-      Quay lại trang trước
-    </a>
+        <!-- ...existing code... -->
+        <button id="submit-bill" class="btn primary full-width">Thêm chi tiêu</button>
+        <p id="message" class="message"></p>
+        <div class="text-center" style="margin-top: 15px;">
+          <a href="../pages/dashboard.html" class="text-link">Hủy</a>
+        </div>
+      </div>
+    
+      <!-- Modal cho danh sách thành viên -->
+      <!-- ...existing code... -->
+    
+      <!-- Modal cho danh sách thành viên -->
+      <!-- ...existing code... -->
     <p id="message" class="message"></p>
   </div>
 
@@ -76,34 +100,25 @@
     <div class="modal-content">
       <h3>Chia hóa đơn</h3>
       <div style="margin: 10px 0;">
-        <button id="select-all" class="btn small">Chọn tất cả</button>
-        <button id="unselect-all" class="btn small">Bỏ chọn tất cả</button>
+        <a id="select-all" href="#" class="text-link">Chọn tất cả</a>
+        <a id="unselect-all" href="#" class="text-link" style="margin-left: 10px;">Bỏ chọn tất cả</a>
         <span style="margin-left: 10px;">Đã chọn: <span id="selected-count">0</span> người</span>
       </div>
 
       <div id="members-list" style="max-height: 300px; overflow-y: auto;">
-        <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px;">
-          <span>Thành viên</span>
-          <span>Số tiền</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <strong>Thành viên</strong>
+          <strong>Số tiền</strong>
         </div>
       </div>
 
-      <div style="margin-top: 20px;">
+      <div style="margin-top: 20px; text-align: center;">
         <button id="save-members" class="btn primary">Lưu</button>
-        <button id="close-members-modal" class="btn">Hủy</button>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script>
-    // Khởi tạo Flatpickr cho trường date
-    flatpickr("#date", {
-      dateFormat: "d/m/Y",
-      defaultDate: "today",
-      maxDate: "today",
-    });
-  </script>
   <script src="../assets/create-bill.js"></script>
 </body>
 </html>
